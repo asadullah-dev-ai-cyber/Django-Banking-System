@@ -1,0 +1,204 @@
+/* =========================================================
+   BANKING MANAGEMENT SYSTEM - PREMIUM UI ENHANCEMENT
+   ========================================================= */
+
+/* --- CSS Variables for consistent theming --- */
+:root {
+    --brand-primary: #2563eb;
+    --brand-hover: #1d4ed8;
+    --brand-dark: #1e3a8a;
+    --bg-main: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-soft: #e2e8f0;
+    --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+    background: var(--bg-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   LINKS & HOVER STATES (Fixing the Account Number Bug)
+   ========================================================= */
+a {
+    color: var(--brand-primary);
+    text-decoration: none !important;
+    transition: color var(--transition-smooth), transform var(--transition-smooth);
+}
+
+a:hover, a:focus {
+    color: var(--brand-dark);
+}
+
+/* Specific fix for Table Row Links (Account Number & Name) */
+.account-row a, 
+td a {
+    font-weight: 500;
+    color: var(--brand-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.account-row a:hover, 
+td a:hover {
+    color: var(--brand-hover) !important;
+    transform: translateX(2px); /* Subtle nudge right on hover */
+}
+
+/* Underline animation on hover for table links */
+.account-row a::after,
+td a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 1.5px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--brand-hover);
+    transform-origin: bottom right;
+    transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.account-row a:hover::after,
+td a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* =========================================================
+   BUTTONS & TACTILE FEEDBACK
+   ========================================================= */
+button, [type="button"], [type="submit"] {
+    font-family: inherit;
+    transition: all var(--transition-smooth);
+}
+
+button:active:not(:disabled), [type="submit"]:active:not(:disabled) {
+    transform: scale(0.97) translateY(1px); /* Satisfying physical press effect */
+}
+
+/* =========================================================
+   TABLES & PREMIUM ROW ANIMATIONS
+   ========================================================= */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+table tbody tr {
+    transition: background-color var(--transition-smooth), transform var(--transition-smooth);
+    animation: rowFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+/* Staggered row animation */
+table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+table tbody tr:nth-child(2) { animation-delay: 0.10s; }
+table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+table tbody tr:nth-child(4) { animation-delay: 0.20s; }
+table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+table tbody tr:nth-child(n+6) { animation-delay: 0.30s; }
+
+table tbody tr:hover {
+    background-color: #f1f5f9 !important;
+    transform: scale(1.002);
+    box-shadow: inset 3px 0 0 var(--brand-primary); /* Blue highlight on left edge */
+}
+
+@keyframes rowFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   FORMS & INPUTS
+   ========================================================= */
+input, select, textarea {
+    transition: all var(--transition-smooth);
+    background-color: #ffffff;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   MODALS & GLASSMORPHISM
+   ========================================================= */
+#accountModal {
+    animation: modalBackdropIn 0.3s ease-out forwards;
+    backdrop-filter: blur(4px); /* Premium frosted glass effect */
+    -webkit-backdrop-filter: blur(4px);
+    background-color: rgba(15, 23, 42, 0.4);
+}
+
+#accountModal > div {
+    animation: modalPanelIn var(--transition-bounce) forwards;
+}
+
+@keyframes modalBackdropIn {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(4px); }
+}
+
+@keyframes modalPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* =========================================================
+   CARDS & HOVER LIFTS
+   ========================================================= */
+.rounded-panel {
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid var(--border-soft);
+}
+
+.shadow-panel {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: box-shadow var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================================
+   TYPOGRAPHY & UTILITIES
+   ========================================================= */
+h1, h2, h3 { letter-spacing: -0.02em; font-weight: 700; }
+.font-mono, .text-emerald-600, .text-red-600 { font-variant-numeric: tabular-nums; }
+::selection { background: rgba(37, 99, 235, 0.2); color: var(--brand-dark); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

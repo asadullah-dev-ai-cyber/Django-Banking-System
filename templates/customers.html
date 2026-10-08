@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Directory - Banking Management System{% endblock %}
+{% block page_title %}Customer Directory{% endblock %}
+{% block mobile_page_title %}Customers{% endblock %}
+
+{% block content %}
+
+<!-- Top Header & Action Panel -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <h1 class="text-xl font-bold tracking-tight text-slate-900">
+            Customer Management
+        </h1>
+
+        <p class="text-xs text-slate-500">
+            Registered bank clients and account holder profiles
+        </p>
+    </div>
+
+    <div>
+        <button
+            type="button"
+            id="openCustomerModalBtn"
+            class="inline-flex items-center gap-2 rounded-md bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+        >
+            <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                />
+            </svg>
+
+            Add New Customer
+        </button>
+    </div>
+</div>
+
+
+<!-- Customers Table Panel -->
+<div class="overflow-hidden rounded-panel border border-slate-200 bg-white shadow-panel">
+
+    <!-- Search Header -->
+    <div class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+        <div class="relative w-full max-w-xs">
+            <label for="customerSearchInput" class="sr-only">
+                Search customers
+            </label>
+
+            <input
+                type="search"
+                id="customerSearchInput"
+                placeholder="Search customer name or email..."
+                autocomplete="off"
+                class="w-full rounded-md border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+
+            <svg
+                class="absolute left-3 top-2.5 h-4 w-4 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+            </svg>
+        </div>
+
+        <p class="text-xs text-slate-400">
+            Total Customers:
+            <span class="font-semibold text-slate-700">
+                {{ customers|length }}
+            </span>
+        </p>
+    </div>
+
+
+    <!-- Customers Table -->
+    <div class="overflow-x-auto">
+        <table
+            class="w-full text-left text-sm text-slate-600"
+            id="customersTable"
+        >
+            <thead class="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Customer Name
+                    </th>
+
+                    <th scope="col" class="px-6 py-3">
+                        Email Address
+                    </th>
+
+                    <th scope="col" class="px-6 py-3">
+                        Phone Number
+                    </th>
+
+                    <th scope="col" class="px-6 py-3">
+                        Linked Accounts
+                    </th>
+
+                    <th scope="col" class="px-6 py-3 text-right">
+                        Registration Date
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-slate-100">
+
+                {% for customer in customers %}
+
+                <tr class="transition-colors hover:bg-slate-50/50">
+
+                    <!-- Customer -->
+                    <td class="px-6 py-4">
+                        <a
+                            href="{% url 'customer_detail' customer.customer_id %}"
+                            class="font-bold text-brand-600 hover:underline"
+                        >
+                            {{ customer.first_name }}
+                            {{ customer.last_name }}
+                        </a>
+
+                        <p class="text-xs text-slate-400">
+                            ID: #CUST-{{ customer.customer_id }}
+                        </p>
+                    </td>
+
+
+                    <!-- Email -->
+                    <td class="px-6 py-4 font-mono text-xs text-slate-700">
+                        {{ customer.email }}
+                    </td>
+
+
+                    <!-- Phone -->
+                    <td class="px-6 py-4 text-xs text-slate-600">
+                        {{ customer.phone|default:"N/A" }}
+                    </td>
+
+
+                    <!-- Accounts -->
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center rounded-md bg-brand-50 px-2 py-1 text-xs font-medium text-brand-700">
+                            {{ customer.account_count }} Account(s)
+                        </span>
+                    </td>
+
+
+                    <!-- Registration Date -->
+                    <td class="px-6 py-4 text-right text-xs text-slate-400">
+                        {{ customer.registration_date|date:"M d, Y"|default:"N/A" }}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td
+                        colspan="5"
+                        class="px-6 py-8 text-center text-sm text-slate-400"
+                    >
+                        No customer records found.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- ADD CUSTOMER MODAL -->
+<div
+    id="customerModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="customerModalTitle"
+>
+    <div class="relative w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl">
+
+        <!-- Modal Header -->
+        <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
+
+            <h3
+                id="customerModalTitle"
+                class="text-lg font-bold text-slate-900"
+            >
+                Register New Customer
+            </h3>
+
+            <button
+                type="button"
+                id="closeCustomerModalBtn"
+                class="text-xl font-semibold text-slate-400 hover:text-slate-600"
+                aria-label="Close customer registration dialog"
+            >
+                &times;
+            </button>
+
+        </div>
+
+
+        <!-- Alert -->
+        <div
+            id="customerModalAlert"
+            class="mb-4 hidden rounded-md border p-3 text-xs font-medium"
+            role="alert"
+            aria-live="polite"
+        ></div>
+
+
+        <!-- Customer Form -->
+        <form
+            id="customerForm"
+            class="space-y-4"
+            novalidate
+        >
+
+            {% csrf_token %}
+
+            <!-- First + Last Name -->
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+                <div>
+                    <label
+                        for="firstName"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        First Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="first_name"
+                        required
+                        maxlength="50"
+                        autocomplete="given-name"
+                        placeholder="John"
+                        class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    />
+                </div>
+
+
+                <div>
+                    <label
+                        for="lastName"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        Last Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="last_name"
+                        required
+                        maxlength="50"
+                        autocomplete="family-name"
+                        placeholder="Doe"
+                        class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    />
+                </div>
+
+            </div>
+
+
+            <!-- Date of Birth -->
+            <div>
+                <label
+                    for="dateOfBirth"
+                    class="mb-1 block text-xs font-semibold text-slate-700"
+                >
+                    Date of Birth
+                </label>
+
+                <input
+                    type="date"
+                    id="dateOfBirth"
+                    name="date_of_birth"
+                    required
+                    class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+            </div>
+
+
+            <!-- Email -->
+            <div>
+                <label
+                    for="email"
+                    class="mb-1 block text-xs font-semibold text-slate-700"
+                >
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    maxlength="100"
+                    autocomplete="email"
+                    placeholder="john.doe@example.com"
+                    class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+            </div>
+
+
+            <!-- Phone -->
+            <div>
+                <label
+                    for="phone"
+                    class="mb-1 block text-xs font-semibold text-slate-700"
+                >
+                    Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    maxlength="20"
+                    autocomplete="tel"
+                    placeholder="+93 700 000 000"
+                    class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+            </div>
+
+
+            <!-- Address -->
+            <div>
+                <label
+                    for="address"
+                    class="mb-1 block text-xs font-semibold text-slate-700"
+                >
+                    Address
+                </label>
+
+                <textarea
+                    id="address"
+                    name="address"
+                    maxlength="255"
+                    rows="3"
+                    autocomplete="street-address"
+                    placeholder="Customer residential address"
+                    class="w-full resize-none rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                ></textarea>
+            </div>
+
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+
+                <button
+                    type="button"
+                    id="cancelCustomerBtn"
+                    class="rounded-md border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="customerSubmitBtn"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    Save Customer
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const modal = document.getElementById("customerModal");
+        const form = document.getElementById("customerForm");
+        const alertBox = document.getElementById("customerModalAlert");
+        const submitBtn = document.getElementById("customerSubmitBtn");
+
+        const openBtn = document.getElementById("openCustomerModalBtn");
+        const closeBtn = document.getElementById("closeCustomerModalBtn");
+        const cancelBtn = document.getElementById("cancelCustomerBtn");
+
+        const searchInput = document.getElementById("customerSearchInput");
+
+
+        /* =========================
+           MODAL
+        ========================= */
+
+        function openCustomerModal() {
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+            document.getElementById("firstName").focus();
+        }
+
+
+        function closeCustomerModal() {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+
+            form.reset();
+
+            alertBox.className =
+                "mb-4 hidden rounded-md border p-3 text-xs font-medium";
+
+            alertBox.textContent = "";
+        }
+
+
+        openBtn.addEventListener("click", openCustomerModal);
+        closeBtn.addEventListener("click", closeCustomerModal);
+        cancelBtn.addEventListener("click", closeCustomerModal);
+
+
+        /* Close when clicking the backdrop */
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                closeCustomerModal();
+            }
+        });
+
+
+        /* Close with Escape */
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+                closeCustomerModal();
+            }
+        });
+
+
+        /* =========================
+           CUSTOMER SEARCH
+        ========================= */
+
+        function filterCustomersTable() {
+
+            const searchTerm = searchInput.value
+                .trim()
+                .toLowerCase();
+
+            const rows = document.querySelectorAll(
+                "#customersTable tbody tr"
+            );
+
+            rows.forEach((row) => {
+
+                const rowText = row.innerText.toLowerCase();
+
+                row.style.display = rowText.includes(searchTerm)
+                    ? ""
+                    : "none";
+            });
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterCustomersTable
+        );
+
+
+        /* =========================
+           CUSTOMER CREATION
+        ========================= */
+
+        form.addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+
+            /* Browser validation */
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Saving...";
+
+
+            const csrfToken = document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            ).value;
+
+
+            const payload = {
+                first_name: document.getElementById("firstName").value.trim(),
+                last_name: document.getElementById("lastName").value.trim(),
+                date_of_birth: document.getElementById("dateOfBirth").value,
+                email: document.getElementById("email").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                address: document.getElementById("address").value.trim(),
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    "{% url 'create_customer' %}",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrfToken,
+                        },
+
+                        body: JSON.stringify(payload),
+                    }
+                );
+
+
+                const result = await response.json();
+
+
+                if (response.ok) {
+
+                    alertBox.className =
+                        "mb-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs font-medium text-emerald-700";
+
+                    alertBox.textContent =
+                        result.message ||
+                        "Customer created successfully!";
+
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+
+                    return;
+                }
+
+
+                alertBox.className =
+                    "mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-700";
+
+                alertBox.textContent =
+                    result.error ||
+                    "Failed to create customer.";
+
+            } catch (error) {
+
+                console.error(
+                    "Customer creation error:",
+                    error
+                );
+
+                alertBox.className =
+                    "mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-700";
+
+                alertBox.textContent =
+                    "Network or server error occurred.";
+
+            } finally {
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Save Customer";
+            }
+        });
+
+    });
+</script>
+
+{% endblock %}

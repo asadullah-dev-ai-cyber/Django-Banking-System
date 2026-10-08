@@ -1,0 +1,894 @@
+{% extends "base.html" %}
+
+{% block title %}Bank Accounts - Banking Management System{% endblock %}
+{% block page_title %}Bank Accounts{% endblock %}
+{% block mobile_page_title %}Accounts{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- =========================================================
+         PAGE HEADER
+    ========================================================== -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                Bank Accounts Management
+            </h1>
+
+            <p class="text-xs text-slate-500">
+                Active bank accounts and account ledger overview
+            </p>
+        </div>
+
+        <button
+            type="button"
+            onclick="openAccountModal()"
+            class="inline-flex items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+        >
+            <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v12m6-6H6"
+                />
+            </svg>
+
+            Open New Account
+        </button>
+    </div>
+
+
+    <!-- =========================================================
+         ACCOUNTS TABLE
+    ========================================================== -->
+    <div class="overflow-hidden rounded-panel border border-slate-200 bg-white shadow-panel">
+
+        <!-- Search / Summary -->
+        <div class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div class="relative w-full max-w-xs">
+
+                <input
+                    type="text"
+                    id="accountSearchInput"
+                    placeholder="Search account or customer..."
+                    autocomplete="off"
+                    class="w-full rounded-md border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+
+                <svg
+                    class="absolute left-3 top-2.5 h-4 w-4 text-slate-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                    />
+                </svg>
+
+            </div>
+
+            <p class="text-xs text-slate-400">
+                Total Accounts:
+                <span class="font-semibold text-slate-700">
+                    {{ accounts|length }}
+                </span>
+            </p>
+
+        </div>
+
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+
+            <table
+                id="accountsTable"
+                class="w-full text-left text-sm text-slate-600"
+            >
+
+                <thead class="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+
+                    <tr>
+
+                        <th scope="col" class="px-6 py-3">
+                            Account Number
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Account Holder
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Account Type
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Current Balance
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Status
+                        </th>
+
+                        <th scope="col" class="px-6 py-3 text-right">
+                            Opening Date
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for account in accounts %}
+
+                    <tr
+                        class="account-row transition-colors hover:bg-slate-50/50"
+                    >
+
+                        <!-- Account Number -->
+                        <td class="px-6 py-4">
+
+                            <a
+                                href="{% url 'account_detail' account.account_id %}"
+                                class="font-mono font-bold text-brand-600 hover:underline"
+                            >
+                                {{ account.account_number }}
+                            </a>
+
+                            <p class="text-xs text-slate-400">
+                                ID: #ACC-{{ account.account_id }}
+                            </p>
+
+                        </td>
+
+
+                        <!-- Customer -->
+                        <td class="px-6 py-4 font-medium text-slate-800">
+
+                            {% if account.customer %}
+
+                                <a
+                                    href="{% url 'customer_detail' account.customer.customer_id %}"
+                                    class="hover:text-brand-600 hover:underline"
+                                >
+                                    {{ account.customer.first_name }}
+                                    {{ account.customer.last_name }}
+                                </a>
+
+                                <p class="text-xs font-normal text-slate-400">
+                                    {{ account.customer.email }}
+                                </p>
+
+                            {% else %}
+
+                                <span class="text-slate-400">
+                                    Unassigned
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Account Type -->
+                        <td class="px-6 py-4 text-slate-700">
+
+                            {% if account.account_type %}
+
+                                {{ account.account_type.type_name }}
+
+                            {% else %}
+
+                                <span class="text-slate-400">
+                                    N/A
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Balance -->
+                        <td class="px-6 py-4 font-bold text-slate-900">
+
+                            ${{ account.balance|floatformat:2 }}
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td class="px-6 py-4">
+
+                            {% if account.status|upper == "ACTIVE" %}
+
+                                <span class="inline-flex items-center gap-1.5 text-xs text-slate-600">
+
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+
+                                    Active
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="inline-flex items-center gap-1.5 text-xs text-slate-600">
+
+                                    <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+
+                                    {{ account.status|default:"Inactive" }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Opening Date -->
+                        <td class="px-6 py-4 text-right text-xs text-slate-400">
+
+                            {{ account.opening_date|date:"M d, Y" }}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="px-6 py-10 text-center text-sm text-slate-400"
+                        >
+                            No bank account records found.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         OPEN ACCOUNT MODAL
+    ========================================================== -->
+    <div
+        id="accountModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"
+    >
+
+        <div
+            class="relative w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl"
+        >
+
+            <!-- Modal Header -->
+            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
+
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">
+                        Open New Bank Account
+                    </h3>
+
+                    <p class="mt-1 text-xs text-slate-400">
+                        Create a new account for an existing customer.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="closeAccountModal()"
+                    class="text-xl font-semibold text-slate-400 transition hover:text-slate-600"
+                    aria-label="Close modal"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <!-- Alert -->
+            <div
+                id="accountModalAlert"
+                class="mb-4 hidden rounded-md border p-3 text-xs font-medium"
+                role="alert"
+            ></div>
+
+
+            <!-- Form -->
+            <form
+                id="accountForm"
+                class="space-y-4"
+            >
+
+                {% csrf_token %}
+
+
+                <!-- Customer -->
+                <div>
+
+                    <label
+                        for="customerId"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        Customer Account Owner
+                    </label>
+
+                    <select
+                        id="customerId"
+                        name="customer_id"
+                        required
+                        class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    >
+
+                        <option value="">
+                            Select Customer
+                        </option>
+
+                        {% for customer in customers %}
+
+                            <option value="{{ customer.customer_id }}">
+                                {{ customer.first_name }}
+                                {{ customer.last_name }}
+                                ({{ customer.email }})
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Account Type -->
+                <div>
+
+                    <label
+                        for="accountTypeId"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        Account Type
+                    </label>
+
+                    <select
+                        id="accountTypeId"
+                        name="account_type_id"
+                        required
+                        class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    >
+
+                        <option value="">
+                            Select Account Type
+                        </option>
+
+                        {% for account_type in account_types %}
+
+                            <option value="{{ account_type.account_type_id }}">
+                                {{ account_type.type_name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Account Number -->
+                <div>
+
+                    <label
+                        for="accountNumber"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        Generated Account Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="accountNumber"
+                        name="account_number"
+                        required
+                        readonly
+                        class="w-full rounded-md border border-slate-200 bg-slate-50 p-2.5 font-mono text-xs text-slate-600 focus:outline-none"
+                    />
+
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        Generated automatically when the form opens.
+                    </p>
+
+                </div>
+
+
+                <!-- Initial Balance -->
+                <div>
+
+                    <label
+                        for="initialBalance"
+                        class="mb-1 block text-xs font-semibold text-slate-700"
+                    >
+                        Initial Deposit Amount ($)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="initialBalance"
+                        name="initial_balance"
+                        min="0"
+                        step="0.01"
+                        value="0.00"
+                        required
+                        class="w-full rounded-md border border-slate-200 p-2.5 text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    />
+
+                </div>
+
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+
+                    <button
+                        type="button"
+                        onclick="closeAccountModal()"
+                        class="rounded-md border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="accountSubmitBtn"
+                        class="rounded-md bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        Open Account
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PAGE JAVASCRIPT
+========================================================== -->
+<script>
+
+    /*
+     * ---------------------------------------------------------
+     * ACCOUNT MODAL
+     * ---------------------------------------------------------
+     */
+
+    function openAccountModal() {
+
+        const modal = document.getElementById("accountModal");
+        const accountNumber = document.getElementById("accountNumber");
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+
+        accountNumber.value = generateAccountNumber();
+    }
+
+
+    function closeAccountModal() {
+
+        const modal = document.getElementById("accountModal");
+        const form = document.getElementById("accountForm");
+        const alertBox = document.getElementById("accountModalAlert");
+
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+
+        form.reset();
+
+        alertBox.classList.add("hidden");
+        alertBox.innerText = "";
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * ACCOUNT NUMBER GENERATOR
+     * ---------------------------------------------------------
+     */
+
+    function generateAccountNumber() {
+
+        const randomNumber = Math.floor(
+            10000000 + Math.random() * 90000000
+        );
+
+        return `ACC-${randomNumber}`;
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * ACCOUNT SEARCH
+     * ---------------------------------------------------------
+     */
+
+    function filterAccountsTable() {
+
+        const searchInput = document
+            .getElementById("accountSearchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+        const rows = document.querySelectorAll(
+            "#accountsTable tbody .account-row"
+        );
+
+        rows.forEach(row => {
+
+            const rowText = row.innerText.toLowerCase();
+
+            row.style.display =
+                rowText.includes(searchInput)
+                    ? ""
+                    : "none";
+
+        });
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * DISPLAY ALERT
+     * ---------------------------------------------------------
+     */
+
+    function showAccountAlert(message, type = "error") {
+
+        const alertBox = document.getElementById(
+            "accountModalAlert"
+        );
+
+        alertBox.className =
+            "mb-4 rounded-md border p-3 text-xs font-medium";
+
+        if (type === "success") {
+
+            alertBox.classList.add(
+                "border-emerald-200",
+                "bg-emerald-50",
+                "text-emerald-700"
+            );
+
+        } else {
+
+            alertBox.classList.add(
+                "border-rose-200",
+                "bg-rose-50",
+                "text-rose-700"
+            );
+
+        }
+
+        alertBox.innerText = message;
+        alertBox.classList.remove("hidden");
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * CREATE ACCOUNT
+     * ---------------------------------------------------------
+     */
+
+    async function handleAccountSubmit(event) {
+
+        event.preventDefault();
+
+        const submitButton =
+            document.getElementById("accountSubmitBtn");
+
+        const customerId =
+            document.getElementById("customerId").value;
+
+        const accountTypeId =
+            document.getElementById("accountTypeId").value;
+
+        const accountNumber =
+            document.getElementById("accountNumber").value;
+
+        const initialBalance =
+            document.getElementById("initialBalance").value;
+
+
+        /*
+         * Basic client-side validation
+         */
+
+        if (!customerId) {
+
+            showAccountAlert(
+                "Please select a customer."
+            );
+
+            return;
+        }
+
+
+        if (!accountTypeId) {
+
+            showAccountAlert(
+                "Please select an account type."
+            );
+
+            return;
+        }
+
+
+        if (!accountNumber) {
+
+            showAccountAlert(
+                "Account number could not be generated."
+            );
+
+            return;
+        }
+
+
+        if (
+            initialBalance === "" ||
+            Number(initialBalance) < 0
+        ) {
+
+            showAccountAlert(
+                "Please enter a valid initial deposit amount."
+            );
+
+            return;
+        }
+
+
+        /*
+         * Disable button while request is running
+         */
+
+        submitButton.disabled = true;
+        submitButton.innerText = "Creating...";
+
+
+        /*
+         * Get CSRF token
+         */
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            ).value;
+
+
+        /*
+         * Prepare request payload
+         */
+
+        const payload = {
+
+            customer_id: Number(customerId),
+
+            account_type_id: Number(accountTypeId),
+
+            account_number: accountNumber,
+
+            initial_balance: Number(initialBalance)
+
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "{% url 'create_account' %}",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+
+                    body: JSON.stringify(payload)
+                }
+            );
+
+
+            /*
+             * Try to parse JSON response
+             */
+
+            let result;
+
+            try {
+
+                result = await response.json();
+
+            } catch {
+
+                result = {
+                    error: "The server returned an invalid response."
+                };
+
+            }
+
+
+            /*
+             * Successful request
+             */
+
+            if (response.ok) {
+
+                showAccountAlert(
+                    result.message ||
+                    "Bank account created successfully!",
+                    "success"
+                );
+
+
+                /*
+                 * Refresh after successful creation
+                 */
+
+                setTimeout(() => {
+
+                    window.location.reload();
+
+                }, 1000);
+
+                return;
+
+            }
+
+
+            /*
+             * Server-side validation error
+             */
+
+            showAccountAlert(
+                result.error ||
+                "Failed to open bank account."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Account creation error:",
+                error
+            );
+
+            showAccountAlert(
+                "Network or server error occurred."
+            );
+
+        } finally {
+
+            submitButton.disabled = false;
+            submitButton.innerText = "Open Account";
+
+        }
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * PAGE INITIALIZATION
+     * ---------------------------------------------------------
+     */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            const searchInput =
+                document.getElementById(
+                    "accountSearchInput"
+                );
+
+
+            /*
+             * Search while typing
+             */
+
+            searchInput.addEventListener(
+                "input",
+                filterAccountsTable
+            );
+
+
+            /*
+             * Automatically open modal if:
+             *
+             * /accounts/?action=new
+             */
+
+            const urlParams =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            if (
+                urlParams.get("action") === "new"
+            ) {
+
+                openAccountModal();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ---------------------------------------------------------
+     * ESCAPE KEY CLOSES MODAL
+     * ---------------------------------------------------------
+     */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                const modal =
+                    document.getElementById(
+                        "accountModal"
+                    );
+
+                if (
+                    !modal.classList.contains("hidden")
+                ) {
+
+                    closeAccountModal();
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,444 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/banking-favicon.svg' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/banking-favicon.svg' %}">
+
+    <title>{% block title %}Banking Management System{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: [
+                            "Inter",
+                            "ui-sans-serif",
+                            "system-ui",
+                            "-apple-system",
+                            "BlinkMacSystemFont",
+                            "Segoe UI",
+                            "sans-serif"
+                        ],
+                    },
+                    colors: {
+                        brand: {
+                            50:  "#eff6ff",
+                            100: "#dbeafe",
+                            200: "#bfdbfe",
+                            300: "#93c5fd",
+                            400: "#60a5fa",
+                            500: "#3b82f6",
+                            600: "#2563eb",
+                            700: "#1d4ed8",
+                            800: "#1e40af",
+                            900: "#1e3a8a",
+                        },
+                        slate: {
+                            950: "#0f172a",
+                        }
+                    },
+                    boxShadow: {
+                        soft: "0 1px 3px rgba(15, 23, 42, 0.06)",
+                        panel: "0 1px 2px rgba(15, 23, 42, 0.04)",
+                    },
+                    borderRadius: {
+                        panel: "0.625rem",
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/banking.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="h-full font-sans text-slate-900 antialiased bg-slate-50">
+
+<!-- =========================================================
+     MOBILE HEADER
+========================================================= -->
+<header class="fixed inset-x-0 top-0 z-40 flex h-16 items-center border-b border-slate-200 bg-white md:hidden">
+    <div class="flex w-full items-center justify-between px-4">
+        <!-- Brand -->
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-md bg-brand-600 text-white">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M3 18h18"/><path d="M12 4l9 5H3l9-5z"/>
+                </svg>
+            </div>
+            <div class="leading-tight">
+                <p class="text-sm font-semibold text-slate-900">Banking Management</p>
+                <p class="text-xs text-slate-500">Operations System</p>
+            </div>
+        </a>
+
+        <!-- Mobile menu button -->
+        <button id="mobile-menu-button" type="button" 
+                class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                aria-label="Open navigation menu" aria-controls="mobile-sidebar" aria-expanded="false">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<!-- =========================================================
+     MOBILE SIDEBAR BACKDROP
+========================================================= -->
+<div id="mobile-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 transition-opacity duration-200 md:hidden" aria-hidden="true"></div>
+
+<!-- =========================================================
+     MOBILE SIDEBAR
+========================================================= -->
+<aside id="mobile-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out md:hidden" aria-label="Mobile navigation">
+    <div class="flex h-full flex-col">
+        <!-- Mobile sidebar header -->
+        <div class="flex h-16 items-center justify-between border-b border-slate-200 px-5">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 items-center justify-center rounded-md bg-brand-600 text-white">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M3 18h18"/><path d="M12 4l9 5H3l9-5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-900">Banking Management</p>
+                    <p class="text-xs text-slate-500">Operations System</p>
+                </div>
+            </div>
+
+            <button id="mobile-close-button" type="button" 
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    aria-label="Close navigation menu">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M6 6l12 12"/><path d="M18 6L6 18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile navigation -->
+        <nav class="flex-1 overflow-y-auto px-3 py-5">
+            <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Main</p>
+
+            <a href="{% url 'dashboard' %}" 
+               class="mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'dashboard' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{% url 'customer_list' %}" 
+               class="mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'customer_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'customer_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Customers
+            </a>
+
+            <a href="{% url 'account_list' %}" 
+               class="mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'account_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'account_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/>
+                </svg>
+                Accounts
+            </a>
+
+            <a href="{% url 'transfer_list' %}" 
+               class="mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'transfer_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'transfer_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M7 7h13"/><path d="M17 3l4 4-4 4"/><path d="M17 17H4"/><path d="M7 13l-3 4 3 4"/>
+                </svg>
+                Transfers
+            </a>
+        </nav>
+
+        <!-- Mobile user section -->
+        <div class="border-t border-slate-200 p-4">
+            {% if request.user.is_authenticated %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+                            {{ request.user.first_name|slice:":1"|default:request.user.username|slice:":1"|upper }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-medium text-slate-900">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </p>
+                            <p class="truncate text-xs text-slate-500">
+                                {{ request.user.email|default:"Active session" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if url_exists_logout %}
+                    <form method="post" action="{% url 'logout' %}" class="shrink-0">
+                        {% csrf_token %}
+                        <button type="submit" class="p-1 text-slate-400 hover:text-red-600 transition-colors" title="Log out">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">U</div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-900">System User</p>
+                        <p class="text-xs text-slate-500">Active session</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</aside>
+
+<!-- =========================================================
+     DESKTOP SIDEBAR
+========================================================= -->
+<aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-white md:flex" aria-label="Primary navigation">
+    <div class="flex h-full w-full flex-col">
+        <!-- Brand -->
+        <div class="flex h-20 items-center border-b border-slate-200 px-6">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-md bg-brand-600 text-white">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M3 18h18"/><path d="M12 4l9 5H3l9-5z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <p class="text-sm font-semibold tracking-tight text-slate-900">Banking Management</p>
+                    <p class="mt-0.5 text-xs text-slate-500">Operations System</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto px-3 py-6">
+            <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Main</p>
+
+            <!-- Dashboard -->
+            <a href="{% url 'dashboard' %}" 
+               class="group mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'dashboard' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5 {% if request.resolver_match.url_name == 'dashboard' %}text-brand-600{% else %}text-slate-400 group-hover:text-slate-600{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- Customers -->
+            <a href="{% url 'customer_list' %}" 
+               class="group mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'customer_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'customer_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5 {% if request.resolver_match.url_name == 'customer_list' %}text-brand-600{% else %}text-slate-400 group-hover:text-slate-600{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Customers</span>
+            </a>
+
+            <!-- Accounts -->
+            <a href="{% url 'account_list' %}" 
+               class="group mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'account_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'account_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5 {% if request.resolver_match.url_name == 'account_list' %}text-brand-600{% else %}text-slate-400 group-hover:text-slate-600{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/>
+                </svg>
+                <span>Accounts</span>
+            </a>
+
+            <!-- Transfers -->
+            <a href="{% url 'transfer_list' %}" 
+               class="group mb-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 {% if request.resolver_match.url_name == 'transfer_list' %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+               {% if request.resolver_match.url_name == 'transfer_list' %}aria-current="page"{% endif %}>
+                <svg class="h-5 w-5 {% if request.resolver_match.url_name == 'transfer_list' %}text-brand-600{% else %}text-slate-400 group-hover:text-slate-600{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M7 7h13"/><path d="M17 3l4 4-4 4"/><path d="M17 17H4"/><path d="M7 13l-3 4 3 4"/>
+                </svg>
+                <span>Transfers</span>
+            </a>
+        </nav>
+
+        <!-- User section -->
+        <div class="border-t border-slate-200 p-4">
+            {% if request.user.is_authenticated %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+                            {{ request.user.first_name|slice:":1"|default:request.user.username|slice:":1"|upper }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-medium text-slate-900">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </p>
+                            <p class="truncate text-xs text-slate-500">
+                                {{ request.user.email|default:"Active session" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">U</div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-900">System User</p>
+                        <p class="text-xs text-slate-500">Active session</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</aside>
+
+<!-- =========================================================
+     MAIN APPLICATION AREA
+========================================================= -->
+<div class="min-h-screen md:pl-64">
+
+    <!-- Desktop top bar -->
+    <header class="hidden h-20 items-center justify-between border-b border-slate-200 bg-white px-8 md:flex">
+        <div>
+            {% block page_header %}
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400">Banking Management</p>
+                <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900">
+                    {% block page_title %}Dashboard{% endblock %}
+                </h1>
+            {% endblock %}
+        </div>
+
+        <!-- System status -->
+        <div class="flex items-center gap-5">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                <span class="text-sm font-medium text-slate-600">System online</span>
+            </div>
+
+            <div class="h-5 w-px bg-slate-200"></div>
+
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Branch:</span>
+                <span class="text-sm font-medium text-slate-700">
+                    {{ current_branch|default:"Central Operations" }}
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile page header -->
+    <div class="border-b border-slate-200 bg-white px-4 pb-4 pt-20 md:hidden">
+        {% block mobile_page_header %}
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-400">Banking Management</p>
+            <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900">
+                {% block mobile_page_title %}Dashboard{% endblock %}
+            </h1>
+        {% endblock %}
+    </div>
+
+    <!-- Main content -->
+    <main class="px-4 py-6 sm:px-6 lg:px-8">
+
+        <!-- Django messages -->
+        {% if messages %}
+            <div class="mx-auto mb-6 max-w-7xl space-y-3">
+                {% for message in messages %}
+                    <div class="flex items-center justify-between gap-3 rounded-md border px-4 py-3 text-sm shadow-sm transition-all duration-150
+                        {% if message.tags == 'success' %}
+                            border-emerald-200 bg-emerald-50 text-emerald-800
+                        {% elif message.tags == 'error' %}
+                            border-red-200 bg-red-50 text-red-800
+                        {% elif message.tags == 'warning' %}
+                            border-amber-200 bg-amber-50 text-amber-800
+                        {% else %}
+                            border-blue-200 bg-blue-50 text-blue-800
+                        {% endif %}
+                    ">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold">
+                                {% if message.tags == 'success' %}Success:
+                                {% elif message.tags == 'error' %}Error:
+                                {% elif message.tags == 'warning' %}Warning:
+                                {% else %}Info:
+                                {% endif %}
+                            </span>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Page content hook -->
+        <div class="mx-auto max-w-7xl">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+</div>
+
+<!-- =========================================================
+     NAVIGATION JAVASCRIPT
+========================================================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.getElementById("mobile-menu-button");
+        const closeButton = document.getElementById("mobile-close-button");
+        const sidebar = document.getElementById("mobile-sidebar");
+        const backdrop = document.getElementById("mobile-backdrop");
+
+        if (!menuButton || !closeButton || !sidebar || !backdrop) return;
+
+        function openMenu() {
+            sidebar.classList.remove("-translate-x-full");
+            backdrop.classList.remove("hidden");
+            menuButton.setAttribute("aria-expanded", "true");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        function closeMenu() {
+            sidebar.classList.add("-translate-x-full");
+            backdrop.classList.add("hidden");
+            menuButton.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("overflow-hidden");
+        }
+
+        menuButton.addEventListener("click", openMenu);
+        closeButton.addEventListener("click", closeMenu);
+        backdrop.addEventListener("click", closeMenu);
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeMenu();
+            }
+        });
+
+        sidebar.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", closeMenu);
+        });
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

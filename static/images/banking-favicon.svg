@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="14" fill="#2563eb"></rect>
+
+    <!-- Bank roof -->
+    <path d="M10 25L32 12L54 25" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <!-- Bank body -->
+    <path d="M14 27H50" stroke="white" stroke-width="4" stroke-linecap="round"></path>
+
+    <!-- Columns -->
+    <path d="M18 29V46
+           M27 29V46
+           M37 29V46
+           M46 29V46" stroke="white" stroke-width="4" stroke-linecap="round"></path>
+
+    <!-- Foundation -->
+    <path d="M11 49H53" stroke="white" stroke-width="4" stroke-linecap="round"></path>
+
+    <!-- Small center accent -->
+    <circle cx="32" cy="19" r="2" fill="white"></circle>
+</svg>

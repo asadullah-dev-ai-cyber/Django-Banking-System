@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% block title %}
+    Customer Profile - {{ customer.first_name }} {{ customer.last_name }}
+{% endblock %}
+{% block page_title %}
+    Customer Profile
+{% endblock %}
+{% block mobile_page_title %}
+    Customer Profile
+{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Profile Banner -->
+    <div class="rounded-panel border border-slate-200 bg-white p-6 shadow-soft">
+
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+            <div class="flex items-center gap-4">
+
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-xl font-bold text-brand-700">
+                    {{ customer.first_name|slice:":1" }}{{ customer.last_name|slice:":1" }}
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">
+                        {{ customer.first_name }} {{ customer.last_name }}
+                    </h2>
+
+                    <p class="text-xs font-mono text-slate-400">
+                        Customer ID: #CUST-{{ customer.customer_id }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="flex flex-wrap items-center gap-6 border-t border-slate-100 pt-4 md:border-0 md:pt-0">
+
+                <div class="text-right">
+                    <p class="text-xs font-medium uppercase text-slate-400">
+                        Total Portfolio Balance
+                    </p>
+
+                    <p class="text-2xl font-bold text-emerald-600">
+                        ${{ total_balance|floatformat:2 }}
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'transfer_create' %}"
+                    class="inline-flex items-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700"
+                >
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+
+                    New Transfer
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Main Grid: Info + Accounts -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        <!-- Personal Info Card -->
+        <div class="rounded-panel border border-slate-200 bg-white p-6 shadow-soft lg:col-span-1">
+
+            <h3 class="mb-4 border-b border-slate-100 pb-3 text-base font-semibold text-slate-900">
+                Personal Details
+            </h3>
+
+            <div class="space-y-4 text-xs">
+
+                <!-- Email -->
+                <div>
+                    <p class="font-medium uppercase tracking-wider text-slate-400">
+                        Email Address
+                    </p>
+
+                    <p class="mt-1 font-mono text-slate-800">
+                        {{ customer.email }}
+                    </p>
+                </div>
+
+
+                <!-- Phone -->
+                <div>
+                    <p class="font-medium uppercase tracking-wider text-slate-400">
+                        Phone Number
+                    </p>
+
+                    <p class="mt-1 text-slate-800">
+                        {{ customer.phone|default:"N/A" }}
+                    </p>
+                </div>
+
+
+                <!-- Date of Birth -->
+                <div>
+                    <p class="font-medium uppercase tracking-wider text-slate-400">
+                        Date of Birth
+                    </p>
+
+                    <p class="mt-1 text-slate-800">
+                        {{ customer.date_of_birth|date:"M d, Y"|default:"N/A" }}
+                    </p>
+                </div>
+
+
+                <!-- Address -->
+                <div>
+                    <p class="font-medium uppercase tracking-wider text-slate-400">
+                        Address
+                    </p>
+
+                    <p class="mt-1 text-slate-800">
+                        {{ customer.address|default:"N/A" }}
+                    </p>
+                </div>
+
+
+                <!-- Member Since -->
+                <div>
+                    <p class="font-medium uppercase tracking-wider text-slate-400">
+                        Member Since
+                    </p>
+
+                    <p class="mt-1 text-slate-800">
+                        {{ customer.registration_date|date:"M d, Y"|default:"N/A" }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Bank Accounts Card -->
+        <div class="rounded-panel border border-slate-200 bg-white p-6 shadow-soft lg:col-span-2">
+
+            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+
+                <h3 class="text-base font-semibold text-slate-900">
+                    Linked Accounts
+                </h3>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                    {{ active_accounts_count }} Active / {{ accounts|length }} Total
+                </span>
+
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-left text-xs text-slate-600">
+
+                    <thead class="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+
+                        <tr>
+                            <th class="px-4 py-3">
+                                Account No.
+                            </th>
+
+                            <th class="px-4 py-3">
+                                Type
+                            </th>
+
+                            <th class="px-4 py-3">
+                                Balance
+                            </th>
+
+                            <th class="px-4 py-3 text-right">
+                                Action
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100">
+
+                        {% for account in accounts %}
+
+                        <tr class="hover:bg-slate-50/50">
+
+                            <td class="px-4 py-3 font-mono font-bold text-brand-600">
+
+                                <a
+                                    href="{% url 'account_detail' account.account_id %}"
+                                    class="hover:underline"
+                                >
+                                    {{ account.account_number }}
+                                </a>
+
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-700">
+                                {{ account.account_type.type_name }}
+                            </td>
+
+                            <td class="px-4 py-3 font-semibold text-emerald-600">
+                                ${{ account.balance|floatformat:2 }}
+                            </td>
+
+                            <td class="px-4 py-3 text-right">
+
+                                <a
+                                    href="{% url 'account_detail' account.account_id %}"
+                                    class="font-semibold text-brand-600 hover:underline"
+                                >
+                                    View Details &rarr;
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td
+                                colspan="4"
+                                class="py-8 text-center text-slate-400"
+                            >
+                                No bank accounts linked to this customer.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Unified Transfer History Table -->
+    <div class="rounded-panel border border-slate-200 bg-white shadow-soft">
+
+        <div class="border-b border-slate-200 px-6 py-4">
+
+            <h3 class="text-base font-semibold text-slate-900">
+                Combined Transfer History
+            </h3>
+
+        </div>
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-left text-xs text-slate-600">
+
+                <thead class="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+
+                    <tr>
+
+                        <th class="px-6 py-3">
+                            Date
+                        </th>
+
+                        <th class="px-6 py-3">
+                            Reference
+                        </th>
+
+                        <th class="px-6 py-3">
+                            From Account
+                        </th>
+
+                        <th class="px-6 py-3">
+                            To Account
+                        </th>
+
+                        <th class="px-6 py-3 text-right">
+                            Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for transfer in transactions %}
+
+                    <tr class="hover:bg-slate-50/50">
+
+                        <td class="whitespace-nowrap px-6 py-4 text-slate-500">
+                            {{ transfer.transfer_date|date:"M d, Y H:i" }}
+                        </td>
+
+                        <td class="whitespace-nowrap px-6 py-4 font-mono text-slate-700">
+                            #{{ transfer.reference_number }}
+                        </td>
+
+                        <td class="whitespace-nowrap px-6 py-4 font-mono">
+
+                            <a
+                                href="{% url 'account_detail' transfer.source_account.account_id %}"
+                                class="text-brand-600 hover:underline"
+                            >
+                                {{ transfer.source_account.account_number }}
+                            </a>
+
+                            <span class="text-[10px] text-slate-400">
+                                ({{ transfer.source_account.customer.first_name }})
+                            </span>
+
+                        </td>
+
+                        <td class="whitespace-nowrap px-6 py-4 font-mono">
+
+                            <a
+                                href="{% url 'account_detail' transfer.destination_account.account_id %}"
+                                class="text-brand-600 hover:underline"
+                            >
+                                {{ transfer.destination_account.account_number }}
+                            </a>
+
+                            <span class="text-[10px] text-slate-400">
+                                ({{ transfer.destination_account.customer.first_name }})
+                            </span>
+
+                        </td>
+
+                        <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-slate-900">
+                            ${{ transfer.amount|floatformat:2 }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="py-8 text-center text-slate-400"
+                        >
+                            No transactions recorded for this customer's accounts.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

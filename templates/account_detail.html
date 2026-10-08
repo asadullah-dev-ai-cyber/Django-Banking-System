@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+
+{% block title %}Account {{ account.account_number }}{% endblock %}
+
+{% block page_title %}Account Details{% endblock %}
+
+{% block mobile_page_title %}Account Details{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- =========================================================
+         BACK NAVIGATION
+    ========================================================== -->
+    <div>
+        <a
+            href="{% url 'account_list' %}"
+            class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-brand-600"
+        >
+            <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19 12H5m7 7-7-7 7-7"
+                />
+            </svg>
+
+            Back to Accounts
+        </a>
+    </div>
+
+
+    <!-- =========================================================
+         ACCOUNT HEADER
+    ========================================================== -->
+    <div class="rounded-panel border border-slate-200 bg-white p-6 shadow-soft">
+
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+
+            <!-- Account identity -->
+            <div class="min-w-0">
+
+                <div class="flex flex-wrap items-center gap-2">
+
+                    <p class="text-xs font-medium uppercase tracking-wider text-slate-400">
+                        {% if account.account_type %}
+                            {{ account.account_type.type_name }} Account
+                        {% else %}
+                            Bank Account
+                        {% endif %}
+                    </p>
+
+                    {% if account.status|upper == "ACTIVE" %}
+
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+                            <span
+                                class="h-1.5 w-1.5 rounded-full bg-emerald-500"
+                                aria-hidden="true"
+                            ></span>
+                            Active
+                        </span>
+
+                    {% else %}
+
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700">
+                            <span
+                                class="h-1.5 w-1.5 rounded-full bg-rose-500"
+                                aria-hidden="true"
+                            ></span>
+                            {{ account.status|default:"Inactive" }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <h2 class="mt-2 break-all font-mono text-2xl font-bold tracking-tight text-slate-900">
+                    {{ account.account_number }}
+                </h2>
+
+
+                <p class="mt-2 text-sm text-slate-500">
+
+                    Holder:
+
+                    {% if account.customer %}
+
+                        <a
+                            href="{% url 'customer_detail' account.customer.customer_id %}"
+                            class="font-medium text-brand-600 transition hover:text-brand-700 hover:underline"
+                        >
+                            {{ account.customer.first_name }}
+                            {{ account.customer.last_name }}
+                        </a>
+
+                    {% else %}
+
+                        <span class="text-slate-400">
+                            Unassigned
+                        </span>
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- Balance + Transfer -->
+            <div class="flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between md:border-0 md:pt-0">
+
+                <div class="sm:text-right">
+
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        Current Balance
+                    </p>
+
+                    <p class="mt-1 text-2xl font-bold text-emerald-600">
+                        ${{ account.balance|floatformat:2 }}
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{% url 'transfer_create' %}?from_account={{ account.account_id }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-md bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                >
+
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M7 7h13M17 3l4 4-4 4M17 17H4M7 13l-3 4 3 4"
+                        />
+                    </svg>
+
+                    Make Transfer
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         ACCOUNT INFORMATION
+    ========================================================== -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+        <!-- Account ID -->
+        <div class="rounded-panel border border-slate-200 bg-white p-5 shadow-panel">
+
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Account ID
+            </p>
+
+            <p class="mt-2 font-mono text-sm font-semibold text-slate-800">
+                #ACC-{{ account.account_id }}
+            </p>
+
+        </div>
+
+
+        <!-- Account Type -->
+        <div class="rounded-panel border border-slate-200 bg-white p-5 shadow-panel">
+
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Account Type
+            </p>
+
+            <p class="mt-2 text-sm font-semibold text-slate-800">
+
+                {% if account.account_type %}
+                    {{ account.account_type.type_name }}
+                {% else %}
+                    N/A
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <!-- Branch -->
+        <div class="rounded-panel border border-slate-200 bg-white p-5 shadow-panel">
+
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Branch
+            </p>
+
+            <p class="mt-2 text-sm font-semibold text-slate-800">
+
+                {% if account.branch %}
+                    {{ account.branch.branch_name }}
+                {% else %}
+                    N/A
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <!-- Opening Date -->
+        <div class="rounded-panel border border-slate-200 bg-white p-5 shadow-panel">
+
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Opening Date
+            </p>
+
+            <p class="mt-2 text-sm font-semibold text-slate-800">
+
+                {% if account.opening_date %}
+                    {{ account.opening_date|date:"M d, Y" }}
+                {% else %}
+                    N/A
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TRANSFER HISTORY
+    ========================================================== -->
+    <div class="rounded-panel border border-slate-200 bg-white shadow-soft">
+
+        <!-- Section Header -->
+        <div class="flex flex-col gap-2 border-b border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+
+                <h3 class="text-base font-semibold text-slate-900">
+                    Recent Transfers
+                </h3>
+
+                <p class="mt-0.5 text-xs text-slate-400">
+                    Incoming and outgoing transfers associated with this account.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-left text-sm">
+
+                <thead
+                    class="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+                >
+
+                    <tr>
+
+                        <th scope="col" class="px-6 py-3">
+                            Date
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Reference
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Type
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            Counterpart
+                        </th>
+
+                        <th scope="col" class="px-6 py-3 text-right">
+                            Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for transfer in transactions %}
+
+                    <tr class="transition-colors hover:bg-slate-50/70">
+
+                        <!-- Date -->
+                        <td class="whitespace-nowrap px-6 py-4 text-xs text-slate-500">
+
+                            {{ transfer.transfer_date|date:"M d, Y H:i" }}
+
+                        </td>
+
+
+                        <!-- Reference -->
+                        <td class="whitespace-nowrap px-6 py-4">
+
+                            <span class="font-mono text-xs font-medium text-slate-700">
+                                #{{ transfer.reference_number }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Type -->
+                        <td class="whitespace-nowrap px-6 py-4">
+
+                            {% if transfer.source_account == account %}
+
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
+
+                                    <svg
+                                        class="h-3.5 w-3.5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M7 17l10-10M17 17V7H7"
+                                        />
+                                    </svg>
+
+                                    Debit
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+
+                                    <svg
+                                        class="h-3.5 w-3.5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M17 7L7 17M7 7v10h10"
+                                        />
+                                    </svg>
+
+                                    Credit
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Counterpart -->
+                        <td class="whitespace-nowrap px-6 py-4 text-slate-800">
+
+                            {% if transfer.source_account == account %}
+
+                                <span class="text-xs text-slate-400">
+                                    To:
+                                </span>
+
+                                <a
+                                    href="{% url 'account_detail' transfer.destination_account.account_id %}"
+                                    class="ml-1 font-mono text-xs font-medium text-brand-600 hover:text-brand-700 hover:underline"
+                                >
+                                    {{ transfer.destination_account.account_number }}
+                                </a>
+
+                            {% else %}
+
+                                <span class="text-xs text-slate-400">
+                                    From:
+                                </span>
+
+                                <a
+                                    href="{% url 'account_detail' transfer.source_account.account_id %}"
+                                    class="ml-1 font-mono text-xs font-medium text-brand-600 hover:text-brand-700 hover:underline"
+                                >
+                                    {{ transfer.source_account.account_number }}
+                                </a>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Amount -->
+                        <td
+                            class="whitespace-nowrap px-6 py-4 text-right font-semibold {% if transfer.source_account == account %}text-red-600{% else %}text-emerald-600{% endif %}"
+                        >
+
+                            {% if transfer.source_account == account %}
+                                -
+                            {% else %}
+                                +
+                            {% endif %}
+
+                            ${{ transfer.amount|floatformat:2 }}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="px-6 py-12 text-center"
+                        >
+
+                            <div class="flex flex-col items-center">
+
+                                <svg
+                                    class="mb-3 h-10 w-10 text-slate-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 6v12m6-6H6"
+                                    />
+                                </svg>
+
+                                <p class="text-sm font-medium text-slate-600">
+                                    No transfers found
+                                </p>
+
+                                <p class="mt-1 text-xs text-slate-400">
+                                    Transfers involving this account will appear here.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
